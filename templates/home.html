@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Welcome to Issue Management System</h1>
+    {% if user.is_authenticated %}
+        <p>You are logged in as {{ user.username }}</p>
+        {% if user.is_admin_user %}
+            <p>You have admin privileges</p>
+        {% endif %}
+    {% else %}
+        <p>Please <a href="{% url 'login' %}">login</a> to continue</p>
+    {% endif %}
+</div>
+{% endblock %}
