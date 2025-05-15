@@ -34,6 +34,21 @@
             </div>
         </div>
     </div>
+    <!-- Notifications section -->
+    {% if user.notifications.exists %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <h5>Notifications</h5>
+        {% for notification in user.notifications.all %}
+        <div class="notification {% if not notification.is_read %}font-weight-bold{% endif %}">
+            {{ notification.message }} - {{ notification.created_at|timesince }} ago
+            {% if not notification.is_read %}
+            <a href="#comment-{{ notification.comment.id }}" class="btn btn-sm btn-primary">View</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
     <!-- Comments section -->
     <div class="mt-4">
         <h3>Comments</h3>
@@ -43,13 +58,14 @@
             {% csrf_token %}
             <div class="form-group">
                 {{ comment_form.content|add_class:"form-control" }}
+                <small class="text-muted">Use @username to mention users</small>
             </div>
             <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
         </form>
 
         <!-- Comments list -->
         {% for comment in issue.comments.all %}
-        <div class="card mb-3">
+        <div id="comment-{{ comment.id }}" class="card mb-3 {% if user in comment.mentioned_users.all %}border-primary{% endif %}">
             <div class="card-body">
                 <p class="card-text">{{ comment.content }}</p>
                 <p class="card-text">
@@ -64,16 +80,6 @@
         {% endfor %}
     </div>
 
-    <!-- Issue actions -->
-    <div class="mt-3">
-        {% if user.is_admin_user or user == issue.created_by %}
-        <a href="{% url 'issue_edit' issue.pk %}" class="btn btn-warning">Edit</a>
-        {% endif %}
-        {% if user.is_admin_user %}
-        <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-danger">Delete</a>
-        {% endif %}
-    </div>
-</div>
     <a href="{% url 'issue_list' %}" class="btn btn-secondary mt-3">Back to List</a>
 </div>
 {% endblock %}

@@ -1,18 +1,57 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.contrib import messages
-from .models import Issue
-from .forms import IssueForm
-from django.core.paginator import Paginator
-from .forms import CommentForm
+from .models import Issue, Comment, Notification
+from .forms import IssueForm, CommentForm, NotificationForm, IssueFilterForm
 
 @login_required
 def issue_list(request):
-    issues = Issue.objects.all().order_by('-created_at')
+    filter_form = IssueFilterForm(request.GET)
+    issues = Issue.objects.all()
+
+    if filter_form.is_valid():
+        status = filter_form.cleaned_data.get('status')
+        priority = filter_form.cleaned_data.get('priority')
+        assigned_to = filter_form.cleaned_data.get('assigned_to')
+        search = filter_form.cleaned_data.get('search')
+
+        if status:
+            issues = issues.filter(status=status)
+        if priority:
+            issues = issues.filter(priority=priority)
+        if assigned_to:
+            issues = issues.filter(assigned_to=assigned_to)
+        if search:
+            issues = issues.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(category__icontains=search)
+            )
+
+    # Add pagination
+    from django.core.paginator import Paginator
     paginator = Paginator(issues, 10)  # Show 10 issues per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'issues/issue_list.html', {'page_obj': page_obj})
+
+    context = {
+        'page_obj': page_obj,
+        'filter_form': filter_form
+    }
+    return render(request, 'issues/issue_list.html', context)
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('issue_detail', pk=notification.issue.id)
+
+@login_required
+def notifications_list(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'issues/notifications_list.html', {'notifications': notifications})
 
 @login_required
 def issue_detail(request, pk):
