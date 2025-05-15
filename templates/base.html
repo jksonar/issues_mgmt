@@ -10,13 +10,28 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="/">Issue Management</a>
-            <div class="navbar-nav ms-auto">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 {% if user.is_authenticated %}
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'issue_list' %}">Issues</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'issue_create' %}">Create Issue</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav">
                     <span class="nav-item nav-link">Welcome, {{ user.username }}</span>
                     <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
+                </div>
                 {% else %}
+                <div class="navbar-nav ms-auto">
                     <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
                     <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+                </div>
                 {% endif %}
             </div>
         </div>

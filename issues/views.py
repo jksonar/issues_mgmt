@@ -4,6 +4,7 @@ from django.contrib import messages
 from .models import Issue
 from .forms import IssueForm
 from django.core.paginator import Paginator
+from .forms import CommentForm
 
 @login_required
 def issue_list(request):
@@ -16,7 +17,11 @@ def issue_list(request):
 @login_required
 def issue_detail(request, pk):
     issue = get_object_or_404(Issue, pk=pk)
-    return render(request, 'issues/issue_detail.html', {'issue': issue})
+    comment_form = CommentForm()
+    return render(request, 'issues/issue_detail.html', {
+        'issue': issue,
+        'comment_form': comment_form
+    })
 
 @login_required
 def issue_create(request):
@@ -61,3 +66,17 @@ def issue_delete(request, pk):
         messages.success(request, 'Issue deleted successfully!')
         return redirect('issue_list')
     return render(request, 'issues/issue_confirm_delete.html', {'issue': issue})
+
+
+@login_required
+def add_comment(request, pk):
+    issue = get_object_or_404(Issue, pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.issue = issue
+            comment.author = request.user
+            comment.save()
+            return redirect('issue_detail', pk=pk)
+    return redirect('issue_detail', pk=pk)
