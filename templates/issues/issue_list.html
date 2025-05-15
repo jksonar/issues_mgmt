@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Issues</h2>
+        <a href="{% url 'issue_create' %}" class="btn btn-primary">Create New Issue</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Created By</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in page_obj %}
+                <tr>
+                    <td><a href="{% url 'issue_detail' issue.pk %}">{{ issue.title }}</a></td>
+                    <td>{{ issue.get_status_display }}</td>
+                    <td>{{ issue.get_priority_display }}</td>
+                    <td>{{ issue.created_by.username }}</td>
+                    <td>{{ issue.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'issue_detail' issue.pk %}" class="btn btn-sm btn-info">View</a>
+                        {% if user.is_admin_user or user == issue.created_by %}
+                        <a href="{% url 'issue_edit' issue.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        {% endif %}
+                        {% if user.is_admin_user %}
+                        <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+            </li>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

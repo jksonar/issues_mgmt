@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>{{ issue.title }}</h2>
+            <div>
+                {% if user.is_admin_user or user == issue.created_by %}
+                <a href="{% url 'issue_edit' issue.pk %}" class="btn btn-warning">Edit</a>
+                {% endif %}
+                {% if user.is_admin_user %}
+                <a href="{% url 'issue_delete' issue.pk %}" class="btn btn-danger">Delete</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Status:</strong> {{ issue.get_status_display }}</p>
+                    <p><strong>Priority:</strong> {{ issue.get_priority_display }}</p>
+                    <p><strong>Category:</strong> {{ issue.category }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Created by:</strong> {{ issue.created_by.username }}</p>
+                    <p><strong>Created at:</strong> {{ issue.created_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Last updated:</strong> {{ issue.updated_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+            <div class="mb-3">
+                <h4>Description</h4>
+                <p>{{ issue.description|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'issue_list' %}" class="btn btn-secondary mt-3">Back to List</a>
+</div>
+{% endblock %}

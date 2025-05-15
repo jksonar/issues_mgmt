@@ -25,5 +25,5 @@ urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
-    # path('issue/', include('issues.urls')),
+    path('issue/', include('issues.urls')),
 ]
